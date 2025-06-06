@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>演示倒数计时器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 0.05em;
+        }
+        
+        .pulse-animation {
+            animation: pulse-red 1s infinite;
+        }
+        
+        @keyframes pulse-red {
+            0%, 100% { 
+                color: rgb(239 68 68);
+                transform: scale(1);
+            }
+            50% { 
+                color: rgb(220 38 38);
+                transform: scale(1.02);
+            }
+        }
+        
+        .button-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .button-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px -8px rgba(93, 92, 222, 0.4);
+        }
+        
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                演示倒数计时器
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                适合演示使用，支持多设备同步观看
+            </p>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 md:p-12 mb-8 text-center border border-gray-200 dark:border-gray-700">
+            <div id="timerDisplay" class="timer-display text-6xl md:text-8xl lg:text-9xl font-light text-gray-900 dark:text-white mb-4">
+                00:00:00
+            </div>
+            <div id="timerStatus" class="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-medium">
+                就绪
+            </div>
+        </div>
+
+        <!-- Time Input Section -->
+        <div id="inputSection" class="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 mb-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
+                设置倒数时间
+            </h3>
+            
+            <div class="grid grid-cols-3 gap-4 mb-6 max-w-md mx-auto">
+                <div class="text-center">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">小时</label>
+                    <input type="number" id="hours" min="0" max="23" value="0" 
+                           class="w-full text-base p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center 
+                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                  focus:ring-2 focus:ring-primary focus:border-primary input-focus
+                                  transition-colors">
+                </div>
+                <div class="text-center">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">分钟</label>
+                    <input type="number" id="minutes" min="0" max="59" value="5" 
+                           class="w-full text-base p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center 
+                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                  focus:ring-2 focus:ring-primary focus:border-primary input-focus
+                                  transition-colors">
+                </div>
+                <div class="text-center">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">秒</label>
+                    <input type="number" id="seconds" min="0" max="59" value="0" 
+                           class="w-full text-base p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center 
+                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                                  focus:ring-2 focus:ring-primary focus:border-primary input-focus
+                                  transition-colors">
+                </div>
+            </div>
+
+            <!-- Quick Preset Buttons -->
+            <div class="flex flex-wrap justify-center gap-3 mb-6">
+                <button onclick="setPreset(1, 0, 0)" 
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+                    1小时
+                </button>
+                <button onclick="setPreset(0, 30, 0)" 
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+                    30分钟
+                </button>
+                <button onclick="setPreset(0, 15, 0)" 
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+                    15分钟
+                </button>
+                <button onclick="setPreset(0, 5, 0)" 
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+                    5分钟
+                </button>
+                <button onclick="setPreset(0, 1, 0)" 
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
+                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
+                    1分钟
+                </button>
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="flex flex-wrap justify-center gap-4 mb-8">
+            <button id="startPauseBtn" onclick="toggleTimer()" 
+                    class="px-8 py-4 bg-primary text-white rounded-xl font-semibold text-lg
+                           button-hover focus:outline-none focus:ring-4 focus:ring-primary/20
+                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none">
+                开始
+            </button>
+            <button onclick="resetTimer()" 
+                    class="px-8 py-4 bg-gray-500 text-white rounded-xl font-semibold text-lg
+                           button-hover focus:outline-none focus:ring-4 focus:ring-gray-500/20">
+                重置
+            </button>
+            <button onclick="addTime(60)" 
+                    class="px-6 py-4 bg-green-500 text-white rounded-xl font-semibold text-lg
+                           button-hover focus:outline-none focus:ring-4 focus:ring-green-500/20">
+                +1分钟
+            </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
+            <div id="progressBar" class="bg-primary rounded-full h-2 transition-all duration-1000" style="width: 0%"></div>
+        </div>
+
+        <!-- Share Info -->
+        <div class="text-center text-gray-600 dark:text-gray-400 text-sm">
+            <p>💡 提示：其他设备可通过相同网络访问此页面同步观看倒数计时</p>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Element -->
+    <audio id="alertSound" preload="auto">
+        <!-- We'll generate the sound programmatically -->
+    </audio>
+
+    <script>
+        // Dark mode support
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // Timer state
+        let isRunning = false;
+        let timeLeft = 0; // in seconds
+        let totalTime = 0; // for progress calculation
+        let timerInterval = null;
+
+        // DOM elements
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerStatus = document.getElementById('timerStatus');
+        const startPauseBtn = document.getElementById('startPauseBtn');
+        const inputSection = document.getElementById('inputSection');
+        const progressBar = document.getElementById('progressBar');
+        const hoursInput = document.getElementById('hours');
+        const minutesInput = document.getElementById('minutes');
+        const secondsInput = document.getElementById('seconds');
+
+        // Generate alert sound
+        function generateAlertSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        function playAlertSound() {
+            try {
+                // Play multiple beeps
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => generateAlertSound(), i * 400);
+                }
+            } catch (error) {
+                console.log('Audio playback failed:', error);
+            }
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+            
+            // Update progress bar
+            if (totalTime > 0) {
+                const progress = ((totalTime - timeLeft) / totalTime) * 100;
+                progressBar.style.width = `${Math.min(progress, 100)}%`;
+            }
+            
+            // Update status and styling
+            if (timeLeft <= 0) {
+                timerStatus.textContent = '时间到！';
+                timerDisplay.classList.add('pulse-animation');
+            } else if (isRunning) {
+                timerStatus.textContent = '计时中...';
+                timerDisplay.classList.remove('pulse-animation');
+            } else if (timeLeft > 0) {
+                timerStatus.textContent = '已暂停';
+                timerDisplay.classList.remove('pulse-animation');
+            } else {
+                timerStatus.textContent = '就绪';
+                timerDisplay.classList.remove('pulse-animation');
+            }
+        }
+
+        function getTimeFromInputs() {
+            const hours = parseInt(hoursInput.value) || 0;
+            const minutes = parseInt(minutesInput.value) || 0;
+            const seconds = parseInt(secondsInput.value) || 0;
+            return hours * 3600 + minutes * 60 + seconds;
+        }
+
+        function setPreset(hours, minutes, seconds) {
+            hoursInput.value = hours;
+            minutesInput.value = minutes;
+            secondsInput.value = seconds;
+        }
+
+        function toggleTimer() {
+            if (!isRunning) {
+                // Start timer
+                if (timeLeft <= 0) {
+                    timeLeft = getTimeFromInputs();
+                    totalTime = timeLeft;
+                }
+                
+                if (timeLeft <= 0) {
+                    alert('请设置倒数时间！');
+                    return;
+                }
+                
+                isRunning = true;
+                startPauseBtn.textContent = '暂停';
+                inputSection.style.opacity = '0.5';
+                inputSection.style.pointerEvents = 'none';
+                
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        isRunning = false;
+                        clearInterval(timerInterval);
+                        startPauseBtn.textContent = '开始';
+                        inputSection.style.opacity = '1';
+                        inputSection.style.pointerEvents = 'auto';
+                        
+                        // Play alert sound
+                        playAlertSound();
+                        
+                        // Show browser notification if supported
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification('倒数计时器', {
+                                body: '时间到！',
+                                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%235D5CDE"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>'
+                            });
+                        }
+                    }
+                }, 1000);
+                
+            } else {
+                // Pause timer
+                isRunning = false;
+                clearInterval(timerInterval);
+                startPauseBtn.textContent = '继续';
+                inputSection.style.opacity = '1';
+                inputSection.style.pointerEvents = 'auto';
+            }
+            
+            updateDisplay();
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            timeLeft = 0;
+            totalTime = 0;
+            clearInterval(timerInterval);
+            startPauseBtn.textContent = '开始';
+            inputSection.style.opacity = '1';
+            inputSection.style.pointerEvents = 'auto';
+            progressBar.style.width = '0%';
+            updateDisplay();
+        }
+
+        function addTime(seconds) {
+            timeLeft += seconds;
+            if (totalTime > 0) {
+                totalTime += seconds;
+            }
+            updateDisplay();
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Initialize display
+        updateDisplay();
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                toggleTimer();
+            } else if (e.code === 'KeyR') {
+                e.preventDefault();
+                resetTimer();
+            }
+        });
+
+        // Update timer display when inputs change
+        [hoursInput, minutesInput, secondsInput].forEach(input => {
+            input.addEventListener('input', () => {
+                if (!isRunning && timeLeft <= 0) {
+                    const newTime = getTimeFromInputs();
+                    timeLeft = newTime;
+                    totalTime = newTime;
+                    updateDisplay();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
