@@ -3,390 +3,593 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>演示倒数计时器</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#5D5CDE'
-                    }
-                }
-            }
-        }
-    </script>
+    <title>同步倒數計時器</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
         * {
-            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
         .timer-display {
-            font-variant-numeric: tabular-nums;
-            letter-spacing: 0.05em;
+            font-size: 4rem;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
         }
-        
-        .pulse-animation {
-            animation: pulse-red 1s infinite;
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
         }
-        
-        @keyframes pulse-red {
-            0%, 100% { 
-                color: rgb(239 68 68);
-                transform: scale(1);
+
+        .time-input {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .time-input input {
+            width: 70px;
+            padding: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+
+        .time-input label {
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .start-btn:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .pause-btn {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: white;
+        }
+
+        .pause-btn:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .reset-btn {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .status {
+            font-size: 1.3rem;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .finished {
+            animation: flash 1s infinite;
+            background: linear-gradient(45deg, #ff4757, #ff6b7a) !important;
+        }
+
+        .times-up {
+            animation: pulse 1s infinite;
+            background: linear-gradient(45deg, #ff4757, #ff6b7a) !important;
+            color: #fff !important;
+            font-size: 1.5rem !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes flash {
+            0%, 50% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .sync-info {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            .timer-display {
+                font-size: 2.5rem;
+                padding: 20px;
             }
-            50% { 
-                color: rgb(220 38 38);
-                transform: scale(1.02);
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
             }
         }
-        
-        .button-hover {
-            transition: all 0.2s ease-in-out;
-        }
-        
-        .button-hover:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px -8px rgba(93, 92, 222, 0.4);
-        }
-        
-        .input-focus:focus {
-            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.1);
+
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
         }
     </style>
 </head>
-<body class="bg-white dark:bg-gray-900 min-h-screen transition-colors">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                演示倒数计时器
-            </h1>
-            <p class="text-gray-600 dark:text-gray-400">
-                适合演示使用，支持多设备同步观看
-            </p>
+<body>
+    <div class="container">
+        <h1>🕐 同步倒數計時器</h1>
+        
+        <div class="time-input" id="timeInput">
+            <label>分鐘:</label>
+            <input type="number" id="minutes" min="0" max="59" value="5" oninput="updateDisplayFromInput()">
+            <label>秒鐘:</label>
+            <input type="number" id="seconds" min="0" max="59" value="0" oninput="updateDisplayFromInput()">
         </div>
-
-        <!-- Timer Display -->
-        <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 md:p-12 mb-8 text-center border border-gray-200 dark:border-gray-700">
-            <div id="timerDisplay" class="timer-display text-6xl md:text-8xl lg:text-9xl font-light text-gray-900 dark:text-white mb-4">
-                00:00:00
-            </div>
-            <div id="timerStatus" class="text-lg md:text-xl text-gray-600 dark:text-gray-400 font-medium">
-                就绪
-            </div>
+        
+        <div class="timer-display" id="display">05:00</div>
+        
+        <div class="controls">
+            <button class="start-btn" id="startBtn" onclick="startTimer()">開始</button>
+            <button class="pause-btn" id="pauseBtn" onclick="pauseTimer()">暫停</button>
+            <button class="reset-btn" onclick="resetTimer()">重設</button>
         </div>
-
-        <!-- Time Input Section -->
-        <div id="inputSection" class="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 mb-6 border border-gray-200 dark:border-gray-700">
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">
-                设置倒数时间
-            </h3>
-            
-            <div class="grid grid-cols-3 gap-4 mb-6 max-w-md mx-auto">
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">小时</label>
-                    <input type="number" id="hours" min="0" max="23" value="0" 
-                           class="w-full text-base p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center 
-                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                  focus:ring-2 focus:ring-primary focus:border-primary input-focus
-                                  transition-colors">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">分钟</label>
-                    <input type="number" id="minutes" min="0" max="59" value="5" 
-                           class="w-full text-base p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center 
-                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                  focus:ring-2 focus:ring-primary focus:border-primary input-focus
-                                  transition-colors">
-                </div>
-                <div class="text-center">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">秒</label>
-                    <input type="number" id="seconds" min="0" max="59" value="0" 
-                           class="w-full text-base p-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center 
-                                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                                  focus:ring-2 focus:ring-primary focus:border-primary input-focus
-                                  transition-colors">
-                </div>
-            </div>
-
-            <!-- Quick Preset Buttons -->
-            <div class="flex flex-wrap justify-center gap-3 mb-6">
-                <button onclick="setPreset(1, 0, 0)" 
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                    1小时
-                </button>
-                <button onclick="setPreset(0, 30, 0)" 
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                    30分钟
-                </button>
-                <button onclick="setPreset(0, 15, 0)" 
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                    15分钟
-                </button>
-                <button onclick="setPreset(0, 5, 0)" 
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                    5分钟
-                </button>
-                <button onclick="setPreset(0, 1, 0)" 
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 
-                               rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm">
-                    1分钟
-                </button>
-            </div>
-        </div>
-
-        <!-- Control Buttons -->
-        <div class="flex flex-wrap justify-center gap-4 mb-8">
-            <button id="startPauseBtn" onclick="toggleTimer()" 
-                    class="px-8 py-4 bg-primary text-white rounded-xl font-semibold text-lg
-                           button-hover focus:outline-none focus:ring-4 focus:ring-primary/20
-                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none">
-                开始
-            </button>
-            <button onclick="resetTimer()" 
-                    class="px-8 py-4 bg-gray-500 text-white rounded-xl font-semibold text-lg
-                           button-hover focus:outline-none focus:ring-4 focus:ring-gray-500/20">
-                重置
-            </button>
-            <button onclick="addTime(60)" 
-                    class="px-6 py-4 bg-green-500 text-white rounded-xl font-semibold text-lg
-                           button-hover focus:outline-none focus:ring-4 focus:ring-green-500/20">
-                +1分钟
-            </button>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
-            <div id="progressBar" class="bg-primary rounded-full h-2 transition-all duration-1000" style="width: 0%"></div>
-        </div>
-
-        <!-- Share Info -->
-        <div class="text-center text-gray-600 dark:text-gray-400 text-sm">
-            <p>💡 提示：其他设备可通过相同网络访问此页面同步观看倒数计时</p>
+        
+        <div class="status" id="status">準備就緒</div>
+        
+        <div class="sync-info">
+            💡 此計時器使用系統時間同步，所有開啟此頁面的用戶都會看到相同的倒數時間
         </div>
     </div>
 
-    <!-- Hidden Audio Element -->
-    <audio id="alertSound" preload="auto">
-        <!-- We'll generate the sound programmatically -->
-    </audio>
-
     <script>
-        // Dark mode support
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-            if (event.matches) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        });
+        let timerState = {
+            duration: 300, // total duration in seconds
+            endTime: null, // absolute end time
+            isRunning: false,
+            isPaused: false,
+            pausedDuration: 0, // total paused time in seconds
+            isFinished: false, // 標記計時器是否已結束
+            userSetDuration: 300 // 記住用戶最後設定的時間
+        };
 
-        // Timer state
-        let isRunning = false;
-        let timeLeft = 0; // in seconds
-        let totalTime = 0; // for progress calculation
         let timerInterval = null;
+        let alarmInterval = null; // 持續鬧鈴間隔
+        let audioContext = null;
 
-        // DOM elements
-        const timerDisplay = document.getElementById('timerDisplay');
-        const timerStatus = document.getElementById('timerStatus');
-        const startPauseBtn = document.getElementById('startPauseBtn');
-        const inputSection = document.getElementById('inputSection');
-        const progressBar = document.getElementById('progressBar');
-        const hoursInput = document.getElementById('hours');
-        const minutesInput = document.getElementById('minutes');
-        const secondsInput = document.getElementById('seconds');
+        // Initialize audio context on first user interaction
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
 
-        // Generate alert sound
-        function generateAlertSound() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Play beep sound
+        function playBeep(frequency = 800, duration = 200, volume = 0.3) {
+            if (!audioContext) return;
+            
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
             
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
             
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration / 1000);
             
             oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
         }
 
-        function playAlertSound() {
-            try {
-                // Play multiple beeps
-                for (let i = 0; i < 3; i++) {
-                    setTimeout(() => generateAlertSound(), i * 400);
+        // Play continuous alarm
+        function startContinuousAlarm() {
+            if (alarmInterval) return; // 防止重複啟動
+            
+            initAudio();
+            
+            // 立即播放第一次
+            playAlarmSequence();
+            
+            // 每2秒重複播放
+            alarmInterval = setInterval(() => {
+                if (timerState.isFinished) {
+                    playAlarmSequence();
+                } else {
+                    stopContinuousAlarm();
                 }
-            } catch (error) {
-                console.log('Audio playback failed:', error);
+            }, 2000);
+        }
+
+        function playAlarmSequence() {
+            playBeep(800, 300, 0.4);
+            setTimeout(() => playBeep(1000, 300, 0.4), 400);
+            setTimeout(() => playBeep(800, 300, 0.4), 800);
+        }
+
+        function stopContinuousAlarm() {
+            if (alarmInterval) {
+                clearInterval(alarmInterval);
+                alarmInterval = null;
             }
         }
 
         function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
-            
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // **修正：簡化輸入框更新機制，只在強制更新時才改變輸入框**
+        function updateInputsFromState(forceUpdate = false) {
+            if (forceUpdate && !timerState.isRunning && !timerState.isPaused && !timerState.isFinished) {
+                //const minutes = Math.floor(timerState.duration / 60);
+               // const seconds = timerState.duration % 60;
+                
+                //document.getElementById('minutes').value = minutes;
+                //document.getElementById('seconds').value = seconds;
+            }
+        }
+
+        // **修正：根據輸入框更新顯示，完全由用戶控制**
+        function updateDisplayFromInput() {
+            // 只有在計時器未運行且未暫停且未結束時才更新顯示
+            if (!timerState.isRunning && !timerState.isPaused && !timerState.isFinished) {
+                const minutesInput = document.getElementById('minutes');
+                const secondsInput = document.getElementById('seconds');
+                
+                const minutes = parseInt(minutesInput.value) || 0;
+                const seconds = parseInt(secondsInput.value) || 0;
+                const totalSeconds = minutes * 60 + seconds;
+                
+                // 更新內部狀態
+                timerState.duration = totalSeconds;
+                timerState.userSetDuration = totalSeconds;
+                
+                // 立即更新顯示
+               // document.getElementById('display').textContent = formatTime(totalSeconds);
+            }
         }
 
         function updateDisplay() {
-            timerDisplay.textContent = formatTime(timeLeft);
+            const display = document.getElementById('display');
+            const status = document.getElementById('status');
             
-            // Update progress bar
-            if (totalTime > 0) {
-                const progress = ((totalTime - timeLeft) / totalTime) * 100;
-                progressBar.style.width = `${Math.min(progress, 100)}%`;
+            if (timerState.isFinished) {
+                // Timer finished - 顯示 "00:00" 並保持在這個狀態
+                display.textContent = "00:00";
+                display.classList.add('finished');
+                status.textContent = 'Times Up !';
+                status.classList.add('times-up');
+                return;
             }
             
-            // Update status and styling
-            if (timeLeft <= 0) {
-                timerStatus.textContent = '时间到！';
-                timerDisplay.classList.add('pulse-animation');
-            } else if (isRunning) {
-                timerStatus.textContent = '计时中...';
-                timerDisplay.classList.remove('pulse-animation');
-            } else if (timeLeft > 0) {
-                timerStatus.textContent = '已暂停';
-                timerDisplay.classList.remove('pulse-animation');
-            } else {
-                timerStatus.textContent = '就绪';
-                timerDisplay.classList.remove('pulse-animation');
+            if (!timerState.isRunning && !timerState.isPaused) {
+                // Timer not started - 顯示當前設定的時間
+                display.textContent = formatTime(timerState.duration);
+                status.textContent = '準備就緒';
+                status.classList.remove('times-up');
+                display.classList.remove('finished');
+                return;
             }
-        }
 
-        function getTimeFromInputs() {
-            const hours = parseInt(hoursInput.value) || 0;
-            const minutes = parseInt(minutesInput.value) || 0;
-            const seconds = parseInt(secondsInput.value) || 0;
-            return hours * 3600 + minutes * 60 + seconds;
-        }
+            if (timerState.isPaused) {
+                // Timer is paused
+                const remaining = Math.max(0, Math.floor(timerState.duration - timerState.pausedDuration));
+                display.textContent = formatTime(remaining);
+                status.textContent = '已暫停';
+                status.classList.remove('times-up');
+                display.classList.remove('finished');
+                return;
+            }
 
-        function setPreset(hours, minutes, seconds) {
-            hoursInput.value = hours;
-            minutesInput.value = minutes;
-            secondsInput.value = seconds;
-        }
-
-        function toggleTimer() {
-            if (!isRunning) {
-                // Start timer
-                if (timeLeft <= 0) {
-                    timeLeft = getTimeFromInputs();
-                    totalTime = timeLeft;
-                }
+            if (timerState.isRunning && timerState.endTime) {
+                // Timer is running
+                const now = Date.now();
+                const remaining = Math.max(0, Math.ceil((timerState.endTime - now) / 1000));
                 
-                if (timeLeft <= 0) {
-                    alert('请设置倒数时间！');
+                display.textContent = formatTime(remaining);
+                
+                if (remaining === 0) {
+                    // Timer finished - 不再自動重設，保持在結束狀態
+                    timerState.isRunning = false;
+                    timerState.isFinished = true;
+                    startContinuousAlarm();
+                    clearInterval(timerInterval);
+                    saveTimerState();
+                    updateDisplay(); // 更新顯示到結束狀態
+                    updateControlsState(); // 更新控制項狀態
+                } else {
+                    status.textContent = '計時中...';
+                    status.classList.remove('times-up');
+                    display.classList.remove('finished');
+                }
+            }
+        }
+
+        function saveTimerState() {
+            localStorage.setItem('timerSync', JSON.stringify({
+                ...timerState,
+                timestamp: Date.now()
+            }));
+        }
+
+        function updateControlsState() {
+            const timeInput = document.getElementById('timeInput');
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if (timerState.isFinished) {
+                // 時間到時禁用開始和暫停按鈕
+                timeInput.classList.add('disabled');
+                startBtn.classList.add('disabled');
+                pauseBtn.classList.add('disabled');
+            } else if (timerState.isRunning) {
+                timeInput.classList.add('disabled');
+                startBtn.textContent = '運行中';
+                startBtn.classList.add('disabled');
+                pauseBtn.classList.remove('disabled');
+            } else if (timerState.isPaused) {
+                timeInput.classList.add('disabled');
+                startBtn.textContent = '繼續';
+                startBtn.classList.remove('disabled');
+                pauseBtn.classList.add('disabled');
+            } else {
+                timeInput.classList.remove('disabled');
+                startBtn.textContent = '開始';
+                startBtn.classList.remove('disabled');
+                pauseBtn.classList.add('disabled');
+            }
+        }
+
+        function startTimer() {
+            if (timerState.isFinished) return;
+            
+            initAudio();
+            
+            if (timerState.isPaused) {
+                // Resume from pause
+                const remaining = Math.max(0, timerState.duration - timerState.pausedDuration);
+                timerState.endTime = Date.now() + (remaining * 1000);
+                timerState.isRunning = true;
+                timerState.isPaused = false;
+            } else {
+                // Start new timer
+                const minutesInput = document.getElementById('minutes');
+                const secondsInput = document.getElementById('seconds');
+                
+                const minutes = parseInt(minutesInput.value) || 0;
+                const seconds = parseInt(secondsInput.value) || 0;
+                timerState.duration = minutes * 60 + seconds;
+                timerState.userSetDuration = timerState.duration; // 記住用戶設定的時間
+                
+                if (timerState.duration <= 0) {
+                    alert('請設定有效的時間！');
                     return;
                 }
                 
-                isRunning = true;
-                startPauseBtn.textContent = '暂停';
-                inputSection.style.opacity = '0.5';
-                inputSection.style.pointerEvents = 'none';
-                
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    updateDisplay();
-                    
-                    if (timeLeft <= 0) {
-                        isRunning = false;
-                        clearInterval(timerInterval);
-                        startPauseBtn.textContent = '开始';
-                        inputSection.style.opacity = '1';
-                        inputSection.style.pointerEvents = 'auto';
-                        
-                        // Play alert sound
-                        playAlertSound();
-                        
-                        // Show browser notification if supported
-                        if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification('倒数计时器', {
-                                body: '时间到！',
-                                icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%235D5CDE"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>'
-                            });
-                        }
-                    }
-                }, 1000);
-                
-            } else {
-                // Pause timer
-                isRunning = false;
-                clearInterval(timerInterval);
-                startPauseBtn.textContent = '继续';
-                inputSection.style.opacity = '1';
-                inputSection.style.pointerEvents = 'auto';
+                timerState.endTime = Date.now() + (timerState.duration * 1000);
+                timerState.isRunning = true;
+                timerState.isPaused = false;
+                timerState.pausedDuration = 0;
+                timerState.isFinished = false;
             }
             
+            saveTimerState();
+            
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateDisplay, 100);
+            
             updateDisplay();
+            updateControlsState();
+        }
+
+        function pauseTimer() {
+            if (!timerState.isRunning || timerState.isFinished) return;
+            
+            const now = Date.now();
+            const elapsed = Math.max(0, (timerState.endTime - now) / 1000);
+            timerState.pausedDuration = timerState.duration - elapsed;
+            
+            timerState.isRunning = false;
+            timerState.isPaused = true;
+            
+            clearInterval(timerInterval);
+            saveTimerState();
+            updateDisplay();
+            updateControlsState();
         }
 
         function resetTimer() {
-            isRunning = false;
-            timeLeft = 0;
-            totalTime = 0;
+            // 立即停止持續鬧鈴
+            stopContinuousAlarm();
+            
+            // 保存用戶設定的時間
+            const userDuration = timerState.userSetDuration;
+            
+            // 完全重設狀態，確保 isFinished = false
+            timerState = {
+                duration: userDuration,
+                endTime: null,
+                isRunning: false,
+                isPaused: false,
+                pausedDuration: 0,
+                isFinished: false,
+                userSetDuration: userDuration
+            };
+            
+            // 停止所有計時器
             clearInterval(timerInterval);
-            startPauseBtn.textContent = '开始';
-            inputSection.style.opacity = '1';
-            inputSection.style.pointerEvents = 'auto';
-            progressBar.style.width = '0%';
+            timerInterval = null;
+            
+            // 清除本地儲存後立即保存新狀態
+            localStorage.removeItem('timerSync');
+            saveTimerState();
+            
+            // **修正：只在重設時才強制更新輸入框**
+            updateInputsFromState(true);
+            
+            // 立即清除所有CSS樣式類別
+            const display = document.getElementById('display');
+            const status = document.getElementById('status');
+            display.classList.remove('finished');
+            status.classList.remove('times-up');
+            
+            // 立即更新顯示和控制項狀態
             updateDisplay();
+            updateControlsState();
         }
 
-        function addTime(seconds) {
-            timeLeft += seconds;
-            if (totalTime > 0) {
-                totalTime += seconds;
+        // **修正：簡化同步機制，不干擾用戶輸入**
+        function syncTimer() {
+            const stored = localStorage.getItem('timerSync');
+            if (stored) {
+                try {
+                    const syncData = JSON.parse(stored);
+                    
+                    // 只同步計時器狀態，不更新輸入框
+                    timerState = { ...syncData };
+                    delete timerState.timestamp;
+                    
+                    // 確保 userSetDuration 存在
+                    if (!timerState.userSetDuration) {
+                        timerState.userSetDuration = timerState.duration;
+                    }
+                    
+                    // 只有在 isFinished 為 true 時才啟動鬧鈴
+                    if (timerState.isFinished) {
+                        startContinuousAlarm();
+                    } else {
+                        stopContinuousAlarm();
+                    }
+                    
+                    // If timer is running, check if it should still be running
+                    if (timerState.isRunning && timerState.endTime) {
+                        const now = Date.now();
+                        if (now >= timerState.endTime) {
+                            // Timer should have finished
+                            timerState.isRunning = false;
+                            timerState.isFinished = true;
+                            startContinuousAlarm();
+                            saveTimerState();
+                        } else {
+                            // Timer is still running, start local interval
+                            if (timerInterval) clearInterval(timerInterval);
+                            timerInterval = setInterval(updateDisplay, 100);
+                        }
+                    }
+                    
+                    updateDisplay();
+                    updateControlsState();
+                    
+                } catch (e) {
+                    console.log('Sync data corrupted, ignoring');
+                }
             }
-            updateDisplay();
         }
 
-        // Request notification permission
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission();
-        }
-
-        // Initialize display
-        updateDisplay();
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                toggleTimer();
-            } else if (e.code === 'KeyR') {
-                e.preventDefault();
-                resetTimer();
+        // Listen for storage changes (sync across tabs)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'timerSync') {
+                syncTimer();
             }
         });
 
-        // Update timer display when inputs change
-        [hoursInput, minutesInput, secondsInput].forEach(input => {
-            input.addEventListener('input', () => {
-                if (!isRunning && timeLeft <= 0) {
-                    const newTime = getTimeFromInputs();
-                    timeLeft = newTime;
-                    totalTime = newTime;
-                    updateDisplay();
-                }
-            });
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            syncTimer();
+            updateDisplay();
+            updateControlsState();
+            updateDisplayFromInput();
+        });
+
+        // 減少同步頻率，避免干擾用戶輸入
+        setInterval(syncTimer, 2000);
+        
+        // Visibility change handler to sync when tab becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                syncTimer();
+            }
         });
     </script>
 </body>
